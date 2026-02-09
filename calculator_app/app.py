@@ -1,5 +1,5 @@
 def add(x, y):
-    return x + y
+    return x - y # BUG: This should be +, but we want to fail CI!
 
 def subtract(x, y):
     return x - y
