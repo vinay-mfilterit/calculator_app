@@ -1,15 +1,16 @@
-name: CI Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "dev" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "dev" ]
 
 jobs:
-  build-and-test:
+  # Job 1: Build and Test (Runs on everything)
+  test:
+    name: Run Unit Tests
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -25,5 +26,24 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
     - name: Run Tests
-      # We can use unittest discovery or run the script directly
       run: python tests/test_app.py
+
+  # Job 2: Simulate Deploy to Staging (Runs only on 'dev' branch)
+  deploy-staging:
+    name: Deploy to Staging
+    needs: test  # Only run if tests pass
+    if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploying to Staging
+        run: echo "🚀 Deploying to Staging Server..."
+
+  # Job 3: Simulate Deploy to Production (Runs only on 'main' branch)
+  deploy-production:
+    name: Deploy to Production
+    needs: test # Only run if tests pass
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploying to Production
+        run: echo "🎉 Deploying to Production Server..."
